@@ -1,5 +1,38 @@
+# Core dependencies
 python-dotenv
-langchain
-langchain-google-genai
-langgraph
-pydantic
+pydantic>=2.0
+pyyaml
+
+# LangChain ecosystem
+langchain>=0.1.0
+langchain-core>=0.1.0
+langchain-community>=0.0.20
+
+# LLM Providers (install at least one)
+langchain-google-genai>=1.0.0
+
+# Optional providers (uncomment if needed)
+# langchain-openai
+# langchain-anthropic
+# langchain-groq
+
+# LangGraph
+langgraph>=0.0.20
+
+# Logging and UI
+loguru
+rich
+gradio>=4.0.0
+
+# Web search and scraping
+duckduckgo-search
+requests
+beautifulsoup4
+
+# Database
+aiosqlite
+
+# Utilities
+click
+
+

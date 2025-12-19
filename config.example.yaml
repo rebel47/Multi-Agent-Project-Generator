@@ -1,0 +1,70 @@
+# Example Configuration File for Multi-Agent Project Generator
+# Save as: config.yaml
+
+# Agent Model Configuration
+agent_config:
+  # Planner Agent - Creates project plans
+  planner_model:
+    provider: "gemini"  # Options: gemini, openai, anthropic, groq
+    model_name: "gemini-2.0-flash-exp"
+    temperature: 0.7
+    streaming: true
+  
+  # Architect Agent - Designs implementation strategy
+  architect_model:
+    provider: "gemini"
+    model_name: "gemini-2.0-flash-exp"
+    temperature: 0.5
+    streaming: true
+  
+  # Coder Agent - Writes the actual code
+  coder_model:
+    provider: "gemini"
+    model_name: "gemini-2.0-flash-exp"
+    temperature: 0.3
+    streaming: true
+  
+  # Reviewer Agent - Reviews code quality
+  reviewer_model:
+    provider: "gemini"
+    model_name: "gemini-2.0-flash-exp"
+    temperature: 0.2
+    streaming: true
+  
+  # Tester Agent - Generates tests
+  tester_model:
+    provider: "gemini"
+    model_name: "gemini-2.0-flash-exp"
+    temperature: 0.4
+    streaming: true
+
+# Feature Flags
+enable_code_review: true      # Run code quality analysis
+enable_testing: true          # Generate unit tests
+enable_git: true             # Initialize git repository
+enable_docker: false         # Generate Docker configuration
+enable_web_search: false     # Enable web search for research
+enable_ci_cd: false         # Generate CI/CD workflows
+
+# Directory Configuration
+generated_projects_dir: "generated_project"
+templates_dir: "templates"
+checkpoint_dir: "checkpoints"
+
+# Processing Limits
+max_recursion_limit: 100     # Maximum agent iterations
+max_file_size: 1048576      # 1MB max file size
+
+# Logging Configuration
+log_level: "INFO"           # Options: DEBUG, INFO, WARNING, ERROR
+enable_debug: false         # Enable debug mode
+enable_verbose: false       # Enable verbose output
+
+# Advanced Settings
+retry_on_error: true        # Retry on API failures
+max_retries: 3             # Maximum retry attempts
+timeout_seconds: 60         # API call timeout
+
+# Cost Tracking
+track_tokens: true          # Track token usage
+estimate_costs: true        # Estimate API costs
