@@ -1,6 +1,12 @@
 from dotenv import load_dotenv
-from langchain.globals import set_verbose, set_debug
-from langchain_groq.chat_models import ChatGroq
+
+# Handle deprecated langchain.globals import
+try:
+    from langchain.globals import set_verbose, set_debug
+except ImportError:
+    def set_verbose(v): pass
+    def set_debug(d): pass
+
 from langchain_google_genai import ChatGoogleGenerativeAI
 from langgraph.constants import END
 from langgraph.graph import StateGraph
@@ -16,13 +22,42 @@ set_debug(True)
 set_verbose(True)
 
 import os
-api_key = os.getenv("GEMINI_API_KEY")
-llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", google_api_key=api_key)
+
+# Lazy LLM initialization - will be created on first use
+_llm = None
+
+def get_llm():
+    """Get or create LLM instance (lazy initialization)"""
+    global _llm
+    if _llm is not None:
+        return _llm
+    
+    # Try OpenAI first
+    openai_key = os.getenv("OPENAI_API_KEY")
+    if openai_key:
+        try:
+            from langchain_openai import ChatOpenAI
+            _llm = ChatOpenAI(model="gpt-4", api_key=openai_key)
+            return _llm
+        except Exception:
+            pass
+    
+    # Fall back to Gemini
+    gemini_key = os.getenv("GEMINI_API_KEY")
+    if gemini_key:
+        try:
+            _llm = ChatGoogleGenerativeAI(model="gemini-2.5-flash", google_api_key=gemini_key)
+            return _llm
+        except Exception:
+            pass
+    
+    raise ValueError("No LLM API key found. Set OPENAI_API_KEY or GEMINI_API_KEY in .env")
 
 
 def planner_agent(state: dict) -> dict:
     """Converts user prompt into a structured Plan."""
     user_prompt = state["user_prompt"]
+    llm = get_llm()
     resp = llm.with_structured_output(Plan).invoke(
         planner_prompt(user_prompt)
     )
@@ -34,6 +69,7 @@ def planner_agent(state: dict) -> dict:
 def architect_agent(state: dict) -> dict:
     """Creates TaskPlan from Plan."""
     plan: Plan = state["plan"]
+    llm = get_llm()
     resp = llm.with_structured_output(TaskPlan).invoke(
         architect_prompt(plan=plan.model_dump_json())
     )
@@ -68,6 +104,7 @@ def coder_agent(state: dict) -> dict:
     )
 
     coder_tools = [read_file, write_file, list_files, get_current_directory]
+    llm = get_llm()
     react_agent = create_react_agent(llm, coder_tools)
 
     react_agent.invoke({"messages": [{"role": "system", "content": system_prompt},

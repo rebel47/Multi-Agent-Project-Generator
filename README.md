@@ -6,12 +6,16 @@ An intelligent multi-agent system powered by **Google Gemini AI** and **LangGrap
 
 - **Natural Language to Code**: Transform simple text descriptions into complete, working projects
 - **Multi-Agent Architecture**: Specialized agents for planning, architecture, and coding
+- **🎨 Web Interface**: Beautiful Streamlit UI for easy project generation and browsing
+- **📂 Project Browser**: View, explore, and download generated projects with file previews
+- **🔄 Real-time Progress**: Watch agents work in real-time during generation
 - **Intelligent Planning**: Automatically determines optimal tech stacks and project structures
 - **Task Decomposition**: Breaks down complex projects into manageable implementation tasks
 - **File System Integration**: Creates proper directory structures and manages file operations
 - **Structured Output**: Uses Pydantic models for reliable, type-safe agent communication
+- **Multi-LLM Support**: Works with OpenAI GPT-4 and Google Gemini (with fallbacks)
 - **Configurable Recursion**: Adjustable recursion limits for handling complex projects
-- **Multiple Tech Stacks**: Supports Python, JavaScript, React, Flask, and more
+- **Multiple Tech Stacks**: Supports Python, JavaScript, React, Flask, FastAPI, and more
 - **Isolated Projects**: Each generated project is stored in its own directory
 
 ## 🏗️ System Architecture
@@ -59,8 +63,9 @@ User Prompt → Planner Agent → Plan Object
 
 ## 📋 Prerequisites
 
-- **Python 3.7+** (Python 3.9+ recommended)
-- **Google Gemini API Key** (get one from [Google AI Studio](https://makersuite.google.com/app/apikey))
+- **Python 3.9+** (Python 3.10+ recommended)
+- **OpenAI API Key** (recommended) - Get from [OpenAI Platform](https://platform.openai.com/api-keys) OR
+- **Google Gemini API Key** (free alternative) - Get from [Google AI Studio](https://makersuite.google.com/app/apikey)
 - **Internet Connection** (for API calls)
 
 ## 🚀 Installation
@@ -89,17 +94,48 @@ User Prompt → Planner Agent → Plan Object
 
 4. **Set up environment variables**
    
-   Create a `.env` file in the project root:
+   Create a `.env` file in the project root with at least one of:
+   
    ```env
+   # Option 1: OpenAI (Recommended - GPT-4)
+   OPENAI_API_KEY=sk-your-openai-key-here
+   
+   # Option 2: Google Gemini (Free alternative)
    GEMINI_API_KEY=your_gemini_api_key_here
    ```
+   
+   **Recommended Setup:**
+   - Use **OpenAI GPT-4** for best results (enable web UI provider selection)
+   - Use **Gemini** as free backup (no credit card required)
 
 ## 💻 Usage
 
-### Basic Usage
+### 🎨 Web Interface (Recommended)
+
+Launch the interactive Streamlit web UI:
 
 ```bash
 python main.py
+# or directly
+streamlit run streamlit_app.py
+```
+
+Then open http://localhost:8501 in your browser.
+
+**Features:**
+- 🚀 **Generate**: Create projects with an intuitive form
+- 📂 **Browse**: View all generated projects
+- 📝 **View Files**: Browse and read project files with syntax highlighting
+- 📊 **Statistics**: View project statistics and file breakdowns
+- 🔄 **Real-time Progress**: Track generation progress with visual feedback
+- ⬇️ **Download**: Download individual files from projects
+
+### 🖥️ CLI Mode
+
+For headless/terminal-based interaction:
+
+```bash
+python main.py --cli
 ```
 
 You'll be prompted to enter:
@@ -109,13 +145,13 @@ You'll be prompted to enter:
 ### Advanced Usage with Custom Recursion Limit
 
 ```bash
-python main.py --recursion-limit 150
-```
+# CLI mode with custom limit
+python main.py --cli --recursion-limit 150
+# or short form
+python main.py --cli -r 150
 
-or using the short form:
-
-```bash
-python main.py -r 150
+# Web UI mode (default)
+python main.py --ui --recursion-limit 150
 ```
 
 **Recursion Limit**: Controls how many agent iterations are allowed. Increase for complex projects, decrease for simpler ones (default: 100).
@@ -144,7 +180,8 @@ Enter a name for this project folder: rock-paper-scissors
 
 ```
 Multi Agent Project Generator/
-├── main.py                      # Entry point and CLI interface
+├── main.py                      # Entry point (CLI + UI switcher)
+├── streamlit_app.py             # 🎨 Streamlit web interface
 ├── requirements.txt             # Python dependencies
 ├── .env                         # Environment variables (API keys)
 ├── README.md                    # This file
@@ -157,13 +194,16 @@ Multi Agent Project Generator/
 └── generated_project/          # Output directory for generated projects
     ├── calculator/             # Example generated project
     │   └── calculator.py
-    └── rock-paper-scissor/     # Another example
-        └── main.py
+    └── todo-app/               # Another example
+        ├── app.py
+        ├── requirements.txt
+        └── database.db
 ```
 
 ### Key Files Explained
 
-- **`main.py`**: CLI interface that handles user input, sets up project roots, and invokes the agent graph
+- **`main.py`**: Entry point that launches Streamlit UI by default or CLI mode with `--cli` flag
+- **`streamlit_app.py`**: Beautiful web interface for project generation, browsing, and file viewing
 - **`agent/graph.py`**: Defines the LangGraph workflow connecting planner, architect, and coder agents
 - **`agent/states.py`**: Pydantic models (`Plan`, `TaskPlan`, `CoderState`) for type-safe agent communication
 - **`agent/prompts.py`**: Carefully crafted prompts that guide each agent's behavior
@@ -173,15 +213,28 @@ Multi Agent Project Generator/
 
 ### Environment Variables
 
-| Variable | Description | Required |
-|----------|-------------|----------|
-| `GEMINI_API_KEY` | Your Google Gemini API key | Yes |
+| Variable | Description | Required | Source |
+|----------|-------------|----------|--------|
+| `OPENAI_API_KEY` | Your OpenAI API key (GPT-4) | Optional | [OpenAI Platform](https://platform.openai.com/api-keys) |
+| `GEMINI_API_KEY` | Your Google Gemini API key | Optional | [Google AI Studio](https://makersuite.google.com/app/apikey) |
+
+**Note:** At least one API key is required. OpenAI is recommended for better results.
 
 ### Command Line Options
 
-| Option | Short | Description | Default |
-|--------|-------|-------------|---------|
-| `--recursion-limit` | `-r` | Maximum agent iterations | 100 |
+| Option | Short | Mode | Description | Default |
+|--------|-------|------|-------------|---------|
+| `--ui` or `--streamlit` | — | Both | Launch Streamlit web UI | Default |
+| `--cli` | — | Both | Run in CLI mode | — |
+| `--recursion-limit` | `-r` | Both | Maximum agent iterations | 100 |
+
+**Examples:**
+```bash
+python main.py                              # Launch Streamlit UI (default)
+python main.py --cli                        # CLI mode
+python main.py --cli -r 200                 # CLI with higher recursion
+python main.py --ui -r 150                  # UI with custom recursion
+```
 
 ## 🛡️ Security Features
 
@@ -256,15 +309,20 @@ This project is created for **educational and research purposes**. Feel free to 
 
 ## 🎯 Future Enhancements
 
-- [ ] Support for multi-file interdependent projects
+- [x] Web interface for easier interaction (Streamlit)
+- [x] Support for multiple LLM providers (OpenAI, Gemini)
+- [x] Project browser and file viewer
+- [x] Real-time progress tracking
 - [ ] Code quality checks and linting
 - [ ] Automated testing generation
 - [ ] Version control integration (auto-commit)
-- [ ] Project templates library
-- [ ] Web interface for easier interaction
-- [ ] Support for other LLM providers (OpenAI, Anthropic, etc.)
-- [ ] Project documentation generation
-- [ ] Dependency management automation
+- [ ] Advanced project templates library
+- [ ] AI code review agent
+- [ ] Docker containerization support
+- [ ] Project export as ZIP
+- [ ] Batch project generation
+- [ ] Project forking and templates
+- [ ] Code documentation generation
 
 ## 🙏 Acknowledgments
 
